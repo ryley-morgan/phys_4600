@@ -23,18 +23,29 @@ int main(){
 
     printf("x=%d\ny=%d\np=%p",x,y,p);
 
+
     /* The benefit of pointers come from their use in array's and functions */
 
-    printf("ARRAYS:")
+    printf("ARRAYS:");
 
     int array [] = {12,14,16,18};
 
-    printf("%d", array[2])
-
-    array //<-pointer to the memory address of the first element in the array
+    // array <-pointer to the memory address of the first element in the array
 
     for (int i = 0; i < 4; ++i)
     {
-        printf("%d", array[i])
+        printf("\n%d", array[i]);
+    }
+
+    printf("using cursors"); // This is considerably faster than the ARRAYS method above in the for-loop
+
+    int* cursor = array;
+
+    for (int i = 0; i < 4; ++i)
+    {
+        printf("\n%d", *cursor);
+
+        cursor ++; //Knows that it is an integer so when you say plus one, it says plus 4 bytes to the integer memory address
+
     }
 }
