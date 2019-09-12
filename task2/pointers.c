@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 int main(){
     int x;
     int y;
-    int* p; //<-store pointer address as an integer
+    int* p; //<-store pointer address as an integer (the type has to match the type of variable stored at this memory address)
 
     x = 5;
     y = 7;
@@ -22,4 +23,18 @@ int main(){
 
     printf("x=%d\ny=%d\np=%p",x,y,p);
 
+    /* The benefit of pointers come from their use in array's and functions */
+
+    printf("ARRAYS:")
+
+    int array [] = {12,14,16,18};
+
+    printf("%d", array[2])
+
+    array //<-pointer to the memory address of the first element in the array
+
+    for (int i = 0; i < 4; ++i)
+    {
+        printf("%d", array[i])
+    }
 }
