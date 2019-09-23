@@ -52,7 +52,7 @@ void averageWithStandardDeviation(float* array, int len, float* avg_cursor, floa
     avg = total / len;
     *avg_cursor = avg;
     printf("\nMean\t%f\tat %p",*avg_cursor,&avg_cursor);
-    std_dev = sqrt((total_2+(pow(avg,2)*(1-2*len)))/(len-1));
+    std_dev = sqrt((total_2 - (total*total/len))/(len-1));
     *std_dev_cursor = std_dev;
     printf("\nStd_dev\t%f\tat %p",*std_dev_cursor,&std_dev_cursor);
 }
