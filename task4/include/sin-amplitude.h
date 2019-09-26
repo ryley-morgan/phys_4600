@@ -1,5 +1,7 @@
 #ifndef __SIN_AMPLITUDE_H   //Include-Guard
-#define __SIN_AMPLITUDE_H   
+#define __SIN_AMPLITUDE_H
+
+#include <math.h>
 
 /*
     Find the maximum absolute amplitude of a sin wave.

@@ -1,5 +1,4 @@
 #include <math.h>
-
 /*
 File: sin-amplitude.c
 Author: ryley.morgan@email.kpu.ca <Ryley Morgan>
@@ -32,6 +31,6 @@ double maxAmplitude(double* data, int n){
             min_value = data[i];    
         }
     }
-    double max_amplitude = abs(max_value-min_value)/2;  // Calculate absolute max amplitude from max/min values
+    double max_amplitude = fabs(max_value-min_value)/2;  // Calculate absolute max amplitude from max/min values
     return max_amplitude;   // Return max amplitude
 }
