@@ -15,6 +15,9 @@ Modified from github.com/jhoyland/phys4600f19/task1/task1.c
         float* avg_cursor:      pointer pointing to average of sample data
         float* std_dev_cursor:  pointer pointing to standard deviation of sample data
 */
+
+/*JAMES: Nice,and good commenting. Could do with a catch for if len==0 or 1 or if any of the pointers are NULL*/
+
 void averageWithStandardDeviation(float* array, int len, float* avg_cursor, float* std_dev_cursor){
     float total = 0;
     float total_2 = 0;
@@ -55,12 +58,14 @@ int main(int argc, char const *argv[])
 
     input_file = fopen(argv[1],"r");    //Open input file to read
 
+    /*JAMES: Check if fopen was successful */
+
     // Define the data array for reading the input file with size = max_data_size to prevent stach smash
     float x [max_data_size];
     float y [max_data_size];
 
     
-    while(1==1)
+    while(1==1)  /*JAMES: can just say while(1) */
     {
         check_flag = fscanf(input_file, "%f %f",&x[j],&y[j]);
         if (check_flag < 2)
@@ -68,6 +73,7 @@ int main(int argc, char const *argv[])
             break;
         }
         i++;
+
         if ( i >= max_data_size )
         {
             printf("Maximum number of samples (%i) reached.\n", max_data_size);
@@ -83,3 +89,5 @@ int main(int argc, char const *argv[])
     printf("\nStandard deviation = %f", standard_deviation);
     return 0;  // Functions which return a value MUST contain at least one return statement
 }
+
+/*JAMES: Good user messages and source commenting */
