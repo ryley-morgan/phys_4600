@@ -1,6 +1,6 @@
 CC=gcc
 CFLAGS=-I$(INC_DIR)
-TARGET=program
+TARGET1=max-amplitude
 # Directories
 INC_DIR = ./include
 SRC_DIR = ./src
@@ -8,19 +8,19 @@ OBJ_DIR = ./build
 
 LIBS = -lm
 
-_DEPS= load-data.h sin-amplitude.h
-DEPS = $(patsubst %,$(INC_DIR)/%,$(_DEPS))
+_DEPS1= load-data.h sin-amplitude.h add-noise.h
+DEPS1 = $(patsubst %,$(INC_DIR)/%,$(_DEPS1))
 
-_OBJ = load-data.o test.o sin-amplitude.o
-OBJ= $(patsubst %, $(OBJ_DIR)/%,$(_OBJ))
+_OBJ1 = load-data.o test.o sin-amplitude.o add-noise.o
+OBJ1= $(patsubst %, $(OBJ_DIR)/%,$(_OBJ1))
 
 
 #OBJ_DIR=$(patsubst %prefix, $(OBJ_DIR)/, $(OBJ))
 
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(DEPS1)
 	$(CC) -c -o $@ $< $(CFLAGS)
 
-$(TARGET): $(OBJ)
+$(TARGET1): $(OBJ1)
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 .PHONY: clean
