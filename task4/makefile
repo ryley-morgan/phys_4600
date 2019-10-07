@@ -8,10 +8,10 @@ OBJ_DIR = ./build
 
 LIBS = -lm
 
-_DEPS1= load-data.h sin-amplitude.h add-noise.h
+_DEPS1= data-io.h sin-amplitude.h add-noise.h
 DEPS1 = $(patsubst %,$(INC_DIR)/%,$(_DEPS1))
 
-_OBJ1 = load-data.o test.o sin-amplitude.o add-noise.o
+_OBJ1 = data-io.o test.o sin-amplitude.o add-noise.o
 OBJ1= $(patsubst %, $(OBJ_DIR)/%,$(_OBJ1))
 
 
