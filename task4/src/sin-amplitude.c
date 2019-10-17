@@ -1,7 +1,7 @@
 #include <math.h>
 /*
 File: sin-amplitude.c
-Author: ryley.morgan@email.kpu.ca <Ryley Morgan>
+Author: Ryley Morgan <ryley-morgan@github.com>
 
 Determines the absolute amplitude of a sinusoidal wave
 */
@@ -14,23 +14,26 @@ Determines the absolute amplitude of a sinusoidal wave
     OUTPUT:
         double:         value of maximum absolute amplitude
 */
-double maxAmplitude(double* data, int n){
+double maxAmplitude(double* data, int n)
+{
     double max_value=0;     //Initialize max_value
     double min_value=0;     //Initialize min_value
+
     // Loop through all data points in array
     for (int i = 0; i < n; ++i)
     {
-        //replace max value if new value is greater than current max
+        // Replace max value if new value is greater than current max
         if (data[i] > max_value)
         {
             max_value = data[i];    
         }
-        //replace min value if new value is less than current min
+        // Replace min value if new value is less than current min
         if (data[i] < min_value)
         {
             min_value = data[i];    
         }
     }
+    
     double max_amplitude = fabs(max_value-min_value)/2;  // Calculate absolute max amplitude from max/min values
     return max_amplitude;   // Return max amplitude
 }

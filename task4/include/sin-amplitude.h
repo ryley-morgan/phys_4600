@@ -1,5 +1,5 @@
-#ifndef __SIN_AMPLITUDE_H   //Include-Guard
-#define __SIN_AMPLITUDE_H
+#ifndef __SIN_AMPLITUDE_H  //Include-Guard
+#define __SIN_AMPLITUDE_H  // Define sin-amplitude.h
 
 #include <math.h>
 
@@ -13,4 +13,4 @@
 */
 double maxAmplitude(double* data, int n);
 
-#endif
+#endif  // End of Include Guard

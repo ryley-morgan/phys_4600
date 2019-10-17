@@ -1,15 +1,15 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "add-noise.h"
-#include "data-io.h"
-#include "filters.h"
-#include "sin-amplitude.h"
+#include "add-noise.h"      // Functions: addNoise
+#include "data-io.h"        // Functions: saveData, loadData
+#include "filters.h"        // Functions: movingAverageFilter
+#include "sin-amplitude.h"  // Functions: maxAmplitude
 
-#define MAX_DATA_POINTS 255
+#define MAX_DATA_POINTS 255 // Maximum number of data points to preallocate array memory
 
 int main(int argc, char const *argv[])
 {
-    // Allocate memory for storing up to 255 data points in arrays
+    // Allocate memory for storing up to MAX_DATA_POINTS data points in arrays
     double noise_data[MAX_DATA_POINTS];
     double smooth_data[MAX_DATA_POINTS];
     double x_data[MAX_DATA_POINTS];
