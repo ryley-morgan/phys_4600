@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
     }
 
     double start_value = 0;
-    double end_value = M_PI;
+    double end_value = 2*M_PI;
     double num_divisions = atoi(argv[1]);
     printf("%f\n", num_divisions);
     double iteration = (end_value-start_value)/num_divisions;
