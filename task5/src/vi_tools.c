@@ -12,6 +12,7 @@
 #define GET_DATA_SRC "DAT:SOU?\n"
 #define GET_IDN "*IDN?\n"
 #define GET_VOLT "CH%i:SCA?\n"
+#define GET_X_SCALE "WFMP:XIN?\n"
 #define SET_CHX "DAT:SOU CH%i\n"
 #define SET_DATA_START "DAT:STAR 1"
 #define SET_DATA_STOP "DAT:STOP 2500"
@@ -22,19 +23,21 @@
 
 
 // Open scope
-ViStatus open_scope(ViSession * defaultRM, ViSession * handle, ViFindList * resourceList, ViUInt32 * numInst)
+ViStatus open_scope(ViSession defaultRM, ViSession *handle, ViFindList *resourceList, ViUInt32 *numInst)
 {
     ViChar description[VI_FIND_BUFLEN];
     ViStatus status;
-    // Read scope info to populate description and resource list
-    status = viFindRsrc(*defaultRM, "USB[0-9]::0x0699?*INSTR",resourceList,numInst,description);  // Techtronics Scopes (Vendor id: 0x0699)
+    // Read scope info to populate description and resource list with Techtronix Scopes
+    status = viFindRsrc(defaultRM, "USB[0-9]::0x0699?*INSTR",resourceList,numInst,description);  // Techtronix Scopes (Vendor id: 0x0699)
     if(status == VI_SUCCESS)
     {
-        status = viOpen(*defaultRM,description, VI_NULL,VI_NULL,handle);
+        status = viOpen(defaultRM,description,VI_NULL,VI_NULL,handle);
         // Confirm scope opened correctly
         if(status == VI_SUCCESS)
         {
+            viSetAttribute(*handle, VI_ATTR_TMO_VALUE, 10000);
             printf("Opened %s\n",description);
+            printf("Resource list: %d\n",*resourceList);
             viClear(*handle); //Clear scope IO buffers
         }
         else
@@ -46,18 +49,20 @@ ViStatus open_scope(ViSession * defaultRM, ViSession * handle, ViFindList * reso
 }
 
 // Get functions
-ViStatus get_curve(ViSession handle, ViChar * dataBuffer, int npoints)
+ViStatus get_curve(ViSession handle, ViInt8 *dataBuf, ViUInt32 npoints)
 {
     ViUInt32 resultCount;
     ViStatus status;
     viClear(handle);
-    viWrite(handle, GET_CURV, (ViUInt32)strlen(GET_CURV), &resultCount); //Specific to our oscilloscope
     sleep(2);
-    status = viRead(handle, dataBuffer, npoints, &resultCount);
+    status = viWrite(handle, GET_CURV, (ViUInt32)strlen(GET_CURV), &resultCount); //Specific to our oscilloscope
+    status = viRead(handle, dataBuf, npoints, &resultCount);
+    //ViInt32 totalPoints = 2500;
+    //viQueryf( handle, ":CURV?", "%#b", &totalPoints, dataBuf);
     return status;
 }
 
-ViStatus get_data(ViSession handle, ViChar * resultBuf, int bufferSize)
+ViStatus get_data(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
@@ -68,7 +73,7 @@ ViStatus get_data(ViSession handle, ViChar * resultBuf, int bufferSize)
     return status;
 }
 
-ViStatus get_data_encoding(ViSession handle, ViChar * resultBuf, int bufferSize)
+ViStatus get_data_encoding(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
@@ -79,7 +84,7 @@ ViStatus get_data_encoding(ViSession handle, ViChar * resultBuf, int bufferSize)
     return status;
 }
 
-ViStatus get_data_width(ViSession handle, ViChar * resultBuf, int bufferSize)
+ViStatus get_data_width(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
@@ -91,7 +96,7 @@ ViStatus get_data_width(ViSession handle, ViChar * resultBuf, int bufferSize)
 }
 
 
-ViStatus get_data_source(ViSession handle, ViChar * resultBuf, int bufferSize)
+ViStatus get_data_source(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
@@ -102,7 +107,18 @@ ViStatus get_data_source(ViSession handle, ViChar * resultBuf, int bufferSize)
     return status;
 }
 
-ViStatus get_idn(ViSession handle, ViChar * resultBuf, int bufferSize)
+ViStatus get_x_scale(ViSession handle, ViChar *resultBuf, int bufferSize)
+{
+    ViUInt32 resultCount;
+    ViStatus status;
+    viClear(handle);
+    viWrite(handle, GET_X_SCALE, (ViUInt32)strlen(GET_DATA_SRC), &resultCount); //Specific to our oscilloscope
+    sleep(2);
+    status = viRead(handle, resultBuf, bufferSize, &resultCount);
+    return status;
+}
+
+ViStatus get_idn(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
@@ -113,11 +129,11 @@ ViStatus get_idn(ViSession handle, ViChar * resultBuf, int bufferSize)
     return status;
 }
 
-ViStatus get_voltage(ViSession handle, int channel, ViChar * resultBuf, int bufferSize)
+ViStatus get_voltage(ViSession handle, int channel, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
     ViStatus status;
-    char command[DEFAULT_COMMAND_SIZE];
+    ViChar command[DEFAULT_COMMAND_SIZE];
     sprintf(command, GET_VOLT, channel);
     viClear(handle);
     viWrite(handle, command, (ViUInt32)strlen(command), &resultCount); //Specific to our oscilloscope
@@ -131,7 +147,7 @@ ViStatus get_voltage(ViSession handle, int channel, ViChar * resultBuf, int buff
 void set_channel(ViSession handle, int channel)
 {
     ViUInt32 resultCount;
-    char command[DEFAULT_COMMAND_SIZE];
+    ViChar command[DEFAULT_COMMAND_SIZE];
     sprintf(command, SET_CHX, channel);
     viClear(handle);
     viWrite(handle, command, (ViUInt32)strlen(command), &resultCount);
@@ -154,7 +170,7 @@ void set_data_stop(ViSession handle)
 void set_voltage(ViSession handle, int channel, float volts)
 {
     ViUInt32 resultCount;
-    char command[DEFAULT_COMMAND_SIZE];
+    ViChar command[DEFAULT_COMMAND_SIZE];
     sprintf(command, SET_VOLT, channel, volts);
     viClear(handle);
     viWrite(handle, command, (ViUInt32)strlen(command), &resultCount);

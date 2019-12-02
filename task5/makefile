@@ -3,15 +3,13 @@ TARGET	  = program
 
 #
 CC		= gcc
-CFLAGS	= -c
+CFLAGS	= -c -DRSVISA_EXTENSION=1
 LFLAGS	=
 
 #Specify build, include and source directories
 BUILDDIR  = ./build
 INCDIR    = ./include
 SRCDIR    = ./src
-
-
 
 #Create a list of all the .c files in the source directory
 SOURCES   = $(wildcard $(SRCDIR)/*.c)
