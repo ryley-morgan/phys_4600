@@ -78,7 +78,7 @@ int main(int argc, char const *argv[])
             ch1DAC = ch1DAC*5/dataWidth; //Scale for Digital-to-Analog conversion with 10 full divisions (2 are missing from screen)
             printf("CH1 Digital to Analog conversion factor: %f (Volts/adc_step)\n", ch1DAC);
 
-            // Set data widths to get complete waveform
+            // Set curve x-data start and end points to 1 and 2500, respectively. This captures complete waveform
             set_data_start(scopeHandle);
             set_data_stop(scopeHandle);
 
@@ -102,13 +102,18 @@ int main(int argc, char const *argv[])
 
             saveData(xdata,ch1Waveform,2500,"raw_data.dat");
 
-            nSmoothPts = movingAverageFilter((double *)ch1Waveform,2500,10,ch1WaveformSmoothed);
+            nSmoothPts = movingAverageFilter(ch1Waveform,2500,10,ch1WaveformSmoothed);
 
-            // Shrink xdata to fit moving average filter output
-            memcpy(xdataSmoothed,&xdata[(2500-nSmoothPts)/2],nSmoothPts);
+            // Shrink xdata to fit moving average filter output (lose difference-of-array-sizes/2 off each end)
+            if ((nSmoothPts % 2) != 0)
+                memcpy(xdataSmoothed,&xdata[(2500-(nSmoothPts-1))/2],nSmoothPts);   // Odd-sized smoothing window
+            else
+                memcpy(xdataSmoothed,&xdata[(2500-nSmoothPts)/2],nSmoothPts);       // Even-sized smoothing window
 
+            // Save smoothed data including resized x-data array
             saveData(xdataSmoothed,ch1WaveformSmoothed, nSmoothPts,"smooth_data.dat");
 
+            // Calculate maximum amplitude using sin-amplitude.h function
             max_amplitude = maxAmplitude(ch1WaveformSmoothed, nSmoothPts);
 
             printf("Max Amplitude = %f", max_amplitude);

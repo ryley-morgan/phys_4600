@@ -30,11 +30,9 @@ ViStatus get_curve(ViSession handle, ViInt8 *dataBuf, ViUInt32 npoints);
 
 ViStatus get_data(ViSession handle, ViChar *resultBuf, int bufferSize);
 
-
 ViStatus get_data_encoding(ViSession handle, ViChar *resultBuf, int bufferSize);
 
 ViStatus get_data_width(ViSession handle, ViChar *resultBuf, int bufferSize);
-
 
 ViStatus get_data_source(ViSession handle, ViChar *resultBuf, int bufferSize);
 

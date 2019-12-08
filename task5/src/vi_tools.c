@@ -49,6 +49,7 @@ ViStatus open_scope(ViSession defaultRM, ViSession *handle, ViFindList *resource
 }
 
 // Get functions
+
 ViStatus get_curve(ViSession handle, ViInt8 *dataBuf, ViUInt32 npoints)
 {
     ViUInt32 resultCount;
