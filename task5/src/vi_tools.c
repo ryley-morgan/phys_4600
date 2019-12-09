@@ -1,3 +1,9 @@
+/*
+File: vi_tools.c
+Author: Ryley Morgan <ryley-morgan@github.com>
+
+A collection of tools for querying and setting Tektronix oscilloscopes
+*/
 #include <visa.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,8 +27,16 @@
 #define RESULT_BUFFER_SIZE 256
 #define DEFAULT_COMMAND_SIZE 36
 
-
-// Open scope
+/*
+    Open connection to oscilloscope
+    ARGS:
+        ViSession defaultRM:            default VISA connection manager
+        ViSession *handle:              oscilloscope handle
+        ViFindList *resourceList:       resources available for access
+        ViUInt32 *numInst:              number of instruments found
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus open_scope(ViSession defaultRM, ViSession *handle, ViFindList *resourceList, ViUInt32 *numInst)
 {
     ViChar description[VI_FIND_BUFLEN];
@@ -48,8 +62,15 @@ ViStatus open_scope(ViSession defaultRM, ViSession *handle, ViFindList *resource
     return status;
 }
 
-// Get functions
-
+/*
+    Retrieve current waveform from oscilloscope
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViInt8 *dataBuf:                address of dataBuffer to store retrieved waveform
+        ViUInt32 npoints:               number of points to collect for waveform
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_curve(ViSession handle, ViInt8 *dataBuf, ViUInt32 npoints)
 {
     ViUInt32 resultCount;
@@ -58,11 +79,18 @@ ViStatus get_curve(ViSession handle, ViInt8 *dataBuf, ViUInt32 npoints)
     sleep(2);
     status = viWrite(handle, GET_CURV, (ViUInt32)strlen(GET_CURV), &resultCount); //Specific to our oscilloscope
     status = viRead(handle, dataBuf, npoints, &resultCount);
-    //ViInt32 totalPoints = 2500;
-    //viQueryf( handle, ":CURV?", "%#b", &totalPoints, dataBuf);
     return status;
 }
 
+/*
+    Retrieve current y-axis specification data
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_data(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -74,6 +102,15 @@ ViStatus get_data(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
+/*
+    Retrieve current y-axis data encoding type e.g. RPBINARY, RIBINARY, etc.
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_data_encoding(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -85,6 +122,15 @@ ViStatus get_data_encoding(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
+/*
+    Retrieve current y-axis number of ADC bin (256-bit or 65535-bit)
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_data_width(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -96,7 +142,15 @@ ViStatus get_data_width(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
-
+/*
+    Retrieve current y-axis data source channel
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_data_source(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -108,6 +162,15 @@ ViStatus get_data_source(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
+/*
+    Retrieve current x-axis scale/div in units of volts/div
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_x_scale(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -119,6 +182,15 @@ ViStatus get_x_scale(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
+/*
+    Get oscilloscope identification string
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_idn(ViSession handle, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -130,6 +202,16 @@ ViStatus get_idn(ViSession handle, ViChar *resultBuf, int bufferSize)
     return status;
 }
 
+/*
+    Retrieve current y-axis voltage/division
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        int channel:                    channel of scope to query
+        ViChar *resultBuf:              address of resultBuffer to store retrieved results of query
+        int bufferSize:                 size of result buffer
+    OUTPUT:
+        ViStatus:                       status of last executed vi-command (i.e. viOpen)
+*/
 ViStatus get_voltage(ViSession handle, int channel, ViChar *resultBuf, int bufferSize)
 {
     ViUInt32 resultCount;
@@ -143,8 +225,14 @@ ViStatus get_voltage(ViSession handle, int channel, ViChar *resultBuf, int buffe
     return status;
 }
 
-
-// Set Functions
+/*
+    Set oscilloscope channel to 1,2, or 3(MATH)
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        int channel:                    oscilloscope channel
+    OUTPUT:
+        Void:
+*/
 void set_channel(ViSession handle, int channel)
 {
     ViUInt32 resultCount;
@@ -154,6 +242,14 @@ void set_channel(ViSession handle, int channel)
     viWrite(handle, command, (ViUInt32)strlen(command), &resultCount);
 }
 
+/*
+    Set data starting point to default for collecting waveform (0 is the left most point)
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        int channel:                    oscilloscope channel
+    OUTPUT:
+        Void:
+*/
 void set_data_start(ViSession handle)
 {
     ViUInt32 resultCount;
@@ -161,6 +257,14 @@ void set_data_start(ViSession handle)
     viWrite(handle, SET_DATA_START, (ViUInt32)strlen(SET_DATA_START), &resultCount); //Specific to our oscilloscope
 }
 
+/*
+    Set data stop point to default for collecting waveform (2500 is the right most point)
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        int channel:                    oscilloscope channel
+    OUTPUT:
+        Void:
+*/
 void set_data_stop(ViSession handle)
 {
     ViUInt32 resultCount;
@@ -168,6 +272,15 @@ void set_data_stop(ViSession handle)
     viWrite(handle, SET_DATA_STOP, (ViUInt32)strlen(SET_DATA_START), &resultCount); //Specific to our oscilloscope
 }
 
+/*
+    Set oscilloscope voltage scale for channel
+    ARGS:
+        ViSession handle:               oscilloscope handle
+        int channel:                    oscilloscope channel
+        float volts:                    floating-point voltage scale
+    OUTPUT:
+        Void:
+*/
 void set_voltage(ViSession handle, int channel, float volts)
 {
     ViUInt32 resultCount;

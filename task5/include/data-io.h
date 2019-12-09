@@ -1,5 +1,5 @@
-#ifndef __DATA_IO_H  // Include guard!
-#define __DATA_IO_H  // Define data-io.h
+#ifndef __DATA_IO_HEADER__  // Include guard!
+#define __DATA_IO_HEADER__  // Define data-io.h
 
 #include <stdio.h>  // Input-output library necessary for interacting with system files
 

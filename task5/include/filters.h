@@ -1,5 +1,5 @@
-#ifndef __FILTERS_H  // Include guard!
-#define __FILTERS_H  // Define filters.h
+#ifndef __FILTERS_HEADER__  // Include guard!
+#define __FILTERS_HEADER__  // Define filters.h
 
 #include <stdlib.h>
 #include <stdio.h>

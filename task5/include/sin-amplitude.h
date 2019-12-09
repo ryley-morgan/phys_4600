@@ -1,5 +1,5 @@
-#ifndef __SIN_AMPLITUDE_H  //Include-Guard
-#define __SIN_AMPLITUDE_H  // Define sin-amplitude.h
+#ifndef __SIN_AMPLITUDE_HEADER__  //Include-Guard
+#define __SIN_AMPLITUDE_HEADER__  // Define sin-amplitude.h
 
 #include <math.h>
 

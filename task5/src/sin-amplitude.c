@@ -1,10 +1,10 @@
-#include <math.h>
 /*
 File: sin-amplitude.c
 Author: Ryley Morgan <ryley-morgan@github.com>
 
 Determines the absolute amplitude of a sinusoidal wave
 */
+#include <math.h>
 
 /*
     Find the maximum absolute amplitude of a sin wave.

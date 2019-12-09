@@ -1,3 +1,9 @@
+/*
+File: main.c
+Author: Ryley Morgan <ryley-morgan@github.com>
+
+Connect and collect waveform from channel 1 of tektronix oscilloscope.
+*/
 #include "data-io.h"
 #include "filters.h"
 #include "sin-amplitude.h"
@@ -8,26 +14,35 @@
 #include <unistd.h>
 #include "vi_tools.h"
 
+#define DATA_BUFFER_SIZE 2500
+#define RESULT_BUFFER_SIZE 256
+
+/*
+    Connect to oscilloscope, retrieve raw waveform from channel 1. Smooth raw data,
+    find maximum amplitude and save both Raw and smoothed waveforms.
+    ARGS:
+        None
+    OUTPUT:
+        int:                            return value 0 if successful and 1 if error
+*/
 int main(int argc, char const *argv[])
 {
-    int y, dataSource, dataWidth, nSmoothPts;
-    float ch1DAC, ch1xscale, dataEncoding;
-    double max_amplitude;
-    double ch1Waveform[2500];
-    double ch1WaveformSmoothed[2500];
-    double xdata[2500];
-    double xdataSmoothed[2500];
+    // Define constants
     char idn[VI_FIND_BUFLEN];
+    double maxVpp;
+    double ch1Waveform[DATA_BUFFER_SIZE];
+    double ch1WaveformSmoothed[DATA_BUFFER_SIZE];
+    double xdata[DATA_BUFFER_SIZE];
+    double xdataSmoothed[DATA_BUFFER_SIZE];
+    float ch1DAC, ch1xscale, dataEncoding;
+    int y, dataSource, dataWidth, nSmoothPts;
 
-    //ViChar description[VI_FIND_BUFLEN];
+    //  Define Vi specific constants
     ViInt8 dataBuffer[DATA_BUFFER_SIZE];
     ViChar resultBuffer[VI_FIND_BUFLEN];
-
     ViFindList resourceList;
-
     ViUInt32 numInst;
     ViUInt32 resultCount=0;
-    
     ViStatus status = VI_SUCCESS;
     ViSession defaultRM, scopeHandle, FGHandle;
 
@@ -47,23 +62,22 @@ int main(int argc, char const *argv[])
 
             // Set scopeHandle to use CH1
             set_channel(scopeHandle, 1);
-            memset(resultBuffer, 0, sizeof(resultBuffer));
+            memset(resultBuffer, 0, sizeof(resultBuffer));  // Clear result Buffer
             get_data_source(scopeHandle,resultBuffer,RESULT_BUFFER_SIZE); // Get data source
             printf("Data Source (Buffer raw) = %s\n",resultBuffer);
             sscanf(resultBuffer,"CH%i",&dataSource);
             printf("Data Source = %i\n",dataSource); // Print current data source
 
             // Check data endoding
-            memset(resultBuffer, 0, sizeof(resultBuffer));
+            memset(resultBuffer, 0, sizeof(resultBuffer));  // Clear result Buffer
             get_data_encoding(scopeHandle,resultBuffer,RESULT_BUFFER_SIZE);
             sscanf(resultBuffer,"%f",&dataEncoding);
             printf("Data Encoding = %s\n",resultBuffer);
 
             // Get channel data width
-            memset(resultBuffer, 0, sizeof(resultBuffer));
+            memset(resultBuffer, 0, sizeof(resultBuffer));  // Clear result Buffer
             get_data_width(scopeHandle,resultBuffer,RESULT_BUFFER_SIZE);
             sscanf(resultBuffer,"%d",&dataWidth);
-
             if (strcmp(resultBuffer,"RIBINARY"))
                 dataWidth = (256/2)-1; // signed integer from -128 to 127
             else if (strcmp(resultBuffer,"RPBINARY"))
@@ -71,7 +85,7 @@ int main(int argc, char const *argv[])
             printf("Data Width = %d\n", dataWidth);
 
             // Get channel 1 voltage scale
-            memset(resultBuffer, 0, sizeof(resultBuffer));
+            memset(resultBuffer, 0, sizeof(resultBuffer));  // Clear result Buffer
             get_voltage(scopeHandle,1,resultBuffer,RESULT_BUFFER_SIZE);
             sscanf(resultBuffer,"%e", &ch1DAC);
             printf("CH1 Voltage Scale: %e (Volts/Div)\n",ch1DAC);
@@ -83,40 +97,41 @@ int main(int argc, char const *argv[])
             set_data_stop(scopeHandle);
 
             // Get x-axis scaling factor (space between each point)
-            memset(resultBuffer, 0, sizeof(resultBuffer));
+            memset(resultBuffer, 0, sizeof(resultBuffer));  // Clear result Buffer
             get_x_scale(scopeHandle,resultBuffer,RESULT_BUFFER_SIZE);
             sscanf(resultBuffer,"%e", &ch1xscale);
             printf("CH1 X scale: %e (Volts/Div)\n",ch1xscale);
 
             // Get scope curve
-            get_curve(scopeHandle, dataBuffer, 2500);
+            get_curve(scopeHandle, dataBuffer, DATA_BUFFER_SIZE);
         
             // Convert data using digital to analog conversion factor: ch1DAC
-            for (int i = 0; i < 2500; ++i)
+            for (int i = 0; i < DATA_BUFFER_SIZE; ++i)
             {
                 y = dataBuffer[i];
                 ch1Waveform[i] = y*ch1DAC;
-                xdata[i] = (i-(2500/2))*ch1xscale;
+                xdata[i] = (i-(DATA_BUFFER_SIZE/2))*ch1xscale;
                 printf("Data point = %i, \tRaw = %x,\tRead = %d,\t Value = %f\n",i,y,y,ch1Waveform[i]);
             }
 
-            saveData(xdata,ch1Waveform,2500,"raw_data.dat");
+            // Save raw waveform
+            saveData(xdata,ch1Waveform,DATA_BUFFER_SIZE,"raw_data.dat");
 
-            nSmoothPts = movingAverageFilter(ch1Waveform,2500,10,ch1WaveformSmoothed);
+            // Smooth raw waveform
+            nSmoothPts = movingAverageFilter(ch1Waveform,DATA_BUFFER_SIZE,10,ch1WaveformSmoothed);
 
             // Shrink xdata to fit moving average filter output (lose difference-of-array-sizes/2 off each end)
             if ((nSmoothPts % 2) != 0)
-                memcpy(xdataSmoothed,&xdata[(2500-(nSmoothPts-1))/2],nSmoothPts);   // Odd-sized smoothing window
+                memcpy(xdataSmoothed,&xdata[(DATA_BUFFER_SIZE-(nSmoothPts-1))/2],nSmoothPts);   // Odd-sized smoothing window
             else
-                memcpy(xdataSmoothed,&xdata[(2500-nSmoothPts)/2],nSmoothPts);       // Even-sized smoothing window
+                memcpy(xdataSmoothed,&xdata[(DATA_BUFFER_SIZE-nSmoothPts)/2],nSmoothPts);       // Even-sized smoothing window
 
             // Save smoothed data including resized x-data array
             saveData(xdataSmoothed,ch1WaveformSmoothed, nSmoothPts,"smooth_data.dat");
 
             // Calculate maximum amplitude using sin-amplitude.h function
-            max_amplitude = maxAmplitude(ch1WaveformSmoothed, nSmoothPts);
-
-            printf("Max Amplitude = %f", max_amplitude);
+            maxVpp = maxAmplitude(ch1WaveformSmoothed, nSmoothPts);
+            printf("Max Amplitude = %f", maxVpp);
         }
 
     }
